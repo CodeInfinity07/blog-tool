@@ -18,41 +18,11 @@ from docx import Document
 from bs4 import BeautifulSoup
 import tempfile
 import os
-
-class Browser:
-    @staticmethod   
-    def init_driver(browser_name):
-        '''init the driver'''
-        def set_properties(browser_option):
-            '''sets the driver's properties'''
-            ua = Headers().generate()      #fake user agent
-            browser_option.add_argument('--headless')
-            browser_option.add_argument('--disable-extensions')
-            browser_option.add_argument('--incognito')
-            browser_option.add_argument('--disable-gpu')
-            browser_option.add_argument('--log-level=3')
-            browser_option.add_argument(f'user-agent={ua}')
-            browser_option.add_argument('--disable-notifications')
-            browser_option.add_argument('--disable-popup-blocking')
-            return browser_option
-        try:
-            browser_name = browser_name.strip().title()
-
-            
-            #automating and opening URL in headless browser
-            if browser_name.lower() == "chrome":
-                browser_option = ChromeOptions()
-                browser_option = set_properties(browser_option)    
-                driver = webdriver.Chrome(ChromeDriverManager().install(),options=browser_option) 
-            elif browser_name.lower() == "firefox":
-                browser_option = FirefoxOptions()
-                browser_option = set_properties(browser_option)
-                driver = webdriver.Firefox(executable_path=GeckoDriverManager().install(),options=browser_option)
-            else:
-                driver = "Browser Not Supported!"
-            return driver
-        except Exception as ex:
-            print(ex)
+chrome_options = webdriver.ChromeOptions()
+chrome_options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
+chrome_options.add_argument("--headless")
+chrome_options.add_argument("--disable-dev-shm-usage")
+chrome_options.add_argument("--no-sandbox")
 
 def auto_post(request):
     emailinput = request.POST["email"]
@@ -64,7 +34,7 @@ def auto_post(request):
     print(checker)
     formFile = file.read()
 
-    f_browser = Browser.init_driver("chrome")  
+    f_browser = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), chrome_options=chrome_options)
 
     if platform == "Wordpress":
         if checker.endswith('.html'):
